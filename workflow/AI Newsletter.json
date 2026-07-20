@@ -1,0 +1,443 @@
+{
+  "name": "AI Newsletter",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "11697562-892a-419a-bf9c-0486e1eb2538",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "80974ff8-9c27-4a3f-9e03-0a27c5b7022e",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "11697562-892a-419a-bf9c-0486e1eb2538"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Bp1m_w-WDDNuF09Q5p-pftZcnoDHToYBm5F95fyFJAA",
+          "mode": "list",
+          "cachedResultName": "AIsubs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Bp1m_w-WDDNuF09Q5p-pftZcnoDHToYBm5F95fyFJAA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Bp1m_w-WDDNuF09Q5p-pftZcnoDHToYBm5F95fyFJAA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.query.name }}",
+            "Email": "={{ $json.query.email }}",
+            "Phone": "={{ $json.query.phone }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "aa5073da-c909-4c07-94c2-0d9b043cf7d6",
+      "name": "Append row in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "REPLACE_WITH_YOUR_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.query.email }}",
+        "subject": "\ud83c\udf89 Welcome to AI Insights Hub!",
+        "message": "=<h2>Hello {{ $json.Name }},</h2>\n\n<p>Thank you for subscribing to <b>AI Insights Hub</b>.</p>\n\n<p>You'll receive:</p>\n\n<ul>\n<li>\ud83d\ude80 Latest AI News</li>\n<li>\ud83d\udcda AI Learning Resources</li>\n<li>\ud83d\udcbc AI Job Updates</li>\n<li>\ud83c\udfaf Interview Tips</li>\n</ul>\n\n<p>Thank you for joining us!</p>\n\n<p><b>AI Insights Hub Team</b></p>",
+        "options": {}
+      },
+      "id": "6a7eb607-ae25-4f1d-af4b-425d0aa856b1",
+      "name": "Send a message",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "webhookId": "1de7a298-e218-469d-836c-0d93f09a7c6c",
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "REPLACE_WITH_YOUR_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Thank you {{ $('Webhook').item.json.query.name }} for subscribing!\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "2763d77a-5afd-487b-a541-5659d0a829cd",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "f002a464-1c5c-4281-8664-dc847ac1ecd2",
+      "name": "Every Day 8AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=artificial+intelligence+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "options": {}
+      },
+      "id": "2d921aea-d33b-4939-8df6-ab879c180087",
+      "name": "Fetch AI News",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Today is {{ $now.toFormat(\"MMMM d, yyyy\") }}. Below are today's AI news headlines pulled from live RSS feeds. Write the digest using ONLY these articles \u2014 do not invent any stories or links.\n\n{{ $('Fetch AI News').all().map(a => '- ' + a.json.title + ' | ' + (a.json.contentSnippet || '') + ' | ' + a.json.link).join('\\n') }}",
+        "options": {
+          "systemMessage": "You are an AI news editor. You are given a list of real AI news articles (title | summary | link). Select the 5-7 most important and relevant AI stories and produce a clean, ready-to-send HTML email digest. Start with an <h2> heading \"\ud83e\udd16 Your Daily AI Digest\". For each story include a bold headline, a 1-2 sentence summary, and the source link as an <a href> using the provided URL. Only use the articles provided \u2014 never fabricate headlines or links. Output ONLY the HTML body, no markdown fences."
+        }
+      },
+      "id": "f48a32d4-9836-4eb6-adba-37c39a4cff29",
+      "name": "Generate AI Digest",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        336
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "id": "8e7efac2-a575-4bcf-be45-3e346caf50fc",
+      "name": "Gemini Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        560
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "name": "REPLACE_WITH_YOUR_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "your-email@example.com",
+        "subject": "=[Preview] Daily AI Digest \u2014 {{ $now.toFormat(\"MMMM d, yyyy\") }}",
+        "message": "={{ $json.output }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Send to subscribers",
+            "disapproveLabel": "Cancel"
+          }
+        },
+        "options": {}
+      },
+      "id": "f024e099-682b-4d2b-a344-8647cb7ef2b1",
+      "name": "Preview & Approve",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        336
+      ],
+      "webhookId": "fc950d71-a65a-4a95-a8f4-9f4a1aacf392",
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "REPLACE_WITH_YOUR_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "approved",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cd092c11-26e2-4fc2-a38c-0f76285c76b9",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1Bp1m_w-WDDNuF09Q5p-pftZcnoDHToYBm5F95fyFJAA",
+          "cachedResultName": "AIsubs"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Sheet1"
+        },
+        "options": {}
+      },
+      "id": "64a25ffa-9673-4fe4-9fa3-a6d03424e3fc",
+      "name": "Get Subscribers",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1248,
+        336
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "REPLACE_WITH_YOUR_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=\ud83e\udd16 Your Daily AI Digest \u2014 {{ $now.toFormat(\"MMMM d, yyyy\") }}",
+        "message": "={{ $('Generate AI Digest').item.json.output }}",
+        "options": {}
+      },
+      "id": "91f35271-dd36-4513-b01f-492891bb745a",
+      "name": "Send Digest",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        336
+      ],
+      "webhookId": "c783f00e-6d0e-4316-af19-2488fd895928",
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "REPLACE_WITH_YOUR_CREDENTIAL"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Day 8AM": {
+      "main": [
+        [
+          {
+            "node": "Fetch AI News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch AI News": {
+      "main": [
+        [
+          {
+            "node": "Generate AI Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate AI Digest": {
+      "main": [
+        [
+          {
+            "node": "Preview & Approve",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate AI Digest",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preview & Approve": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Get Subscribers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Subscribers": {
+      "main": [
+        [
+          {
+            "node": "Send Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
